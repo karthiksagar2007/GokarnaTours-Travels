@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
+
+    match /places/{placeId} {
+      allow read: if (resource.data.published == true) || isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name','sub','description','imageUrl','published','updatedAt','updatedBy'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.sub is string && request.resource.data.sub.size() <= 120
+        && request.resource.data.description is string && request.resource.data.description.size() <= 1500
+        && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 1200
+        && request.resource.data.published is bool
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name','sub','description','imageUrl','published','updatedAt','updatedBy'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.sub is string && request.resource.data.sub.size() <= 120
+        && request.resource.data.description is string && request.resource.data.description.size() <= 1500
+        && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 1200
+        && request.resource.data.published is bool
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /packages/{packageId} {
+      allow read: if (resource.data.published == true) || isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name','region','description','price','duration','imageUrl','published','updatedAt','updatedBy'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.description is string && request.resource.data.description.size() <= 1500
+        && request.resource.data.price is number && request.resource.data.price >= 0
+        && request.resource.data.duration is string && request.resource.data.duration.size() <= 80
+        && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 1200
+        && request.resource.data.published is bool
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name','region','description','price','duration','imageUrl','published','updatedAt','updatedBy'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.description is string && request.resource.data.description.size() <= 1500
+        && request.resource.data.price is number && request.resource.data.price >= 0
+        && request.resource.data.duration is string && request.resource.data.duration.size() <= 80
+        && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 1200
+        && request.resource.data.published is bool
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /bookings/{bookingId} {
+      allow read, update, delete: if isAdmin();
+      // Public clients cannot directly create or modify booking records. Use the App-Check-enforced Cloud Function.
+      allow create: if false;
+    }
+    match /_publicRateLimits/{rateId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
