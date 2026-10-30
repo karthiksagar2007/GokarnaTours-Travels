@@ -1,3 +1,13 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-export default defineConfig({ plugins: [react()], build: { rollupOptions: { input: ['index.html', 'admin.html'] } } });
+
+export default defineConfig({
+  base: '/GokarnaTours-Travels/',
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: ['index.html', 'admin.html']
+    }
+  }
+});
