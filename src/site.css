@@ -278,6 +278,14 @@ button,input,select,textarea{font:inherit;color:inherit}
   .search{grid-template-columns:1fr}
 }
 
+/* Fix invisible sections and images */
+.reveal.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+
 
 
 
